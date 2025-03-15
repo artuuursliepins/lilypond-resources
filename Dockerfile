@@ -22,7 +22,7 @@ COPY . /app
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Ja nepieciešams, expose portu, piemēram, 8080
-EXPOSE 8080
+EXPOSE 9090
 
 # 4. Palaižam aplikāciju
 CMD ["python3", "wsgi.py", "server.py"]
