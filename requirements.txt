@@ -1,0 +1,8 @@
+flask
+uuid
+requests
+openai
+python-dotenv
+pytesseract
+opencv-python
+pdf2image
