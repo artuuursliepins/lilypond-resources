@@ -7,5 +7,6 @@ pytesseract
 opencv-python
 pdf2image
 pytesseract
+waitress
 
 
