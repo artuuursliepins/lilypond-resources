@@ -25,4 +25,4 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 EXPOSE 8080
 
 # 4. Palaižam aplikāciju
-CMD ["python3", "server.py"]
+CMD ["python3", "wsgi.py", "server.py"]
