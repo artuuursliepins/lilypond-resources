@@ -79,5 +79,5 @@ def render_lilypond_to_png():
     return send_file(output_png, mimetype="image/png")
 
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 9090))  # Ja PORT nav definēts, izmanto 9090
+    port = int(os.getenv("PORT", 8080))  # Ja PORT nav definēts, izmanto 8080
     app.run(host="0.0.0.0", port=port)
