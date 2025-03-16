@@ -5,11 +5,21 @@ import subprocess
 import uuid
 import paramiko
 import atexit
+import time
+import pytz
+from datetime import datetime
 
 app = Flask(__name__)
 
 UPLOAD_FOLDER = "static/uploaded_scores"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Iestata noklusējuma laika joslu (piemēram, 'Europe/Riga')
+DEFAULT_TIMEZONE = os.getenv("TIMEZONE", "Europe/Riga")
+
+def get_current_time():
+    tz = pytz.timezone(DEFAULT_TIMEZONE)
+    return datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S")
 
 temp_files = []  # Saglabā pagaidu failus, lai tos iztīrītu
 
@@ -113,4 +123,5 @@ atexit.register(cleanup_temp_files)  # Tīrīšana pie servera izslēgšanas
 
 if __name__ == "__main__":
     print("Starting production WSGI server with Waitress...")
+    print("Pašreizējais laiks:", get_current_time())
     serve(app, host="0.0.0.0", port=8080)
