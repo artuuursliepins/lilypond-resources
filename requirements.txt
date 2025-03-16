@@ -10,5 +10,7 @@ waitress
 lilypond
 reportlab  # PDF apstrādei, ja nepieciešams
 numpy  # OpenCV var prasīt
+paramiko  # SSH automatizācijai
+
 
 
