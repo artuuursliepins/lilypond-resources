@@ -40,6 +40,7 @@ WORKDIR /app
 COPY . /app
 
 # 3. Instalējam Python atkarības
+COPY requirements.txt /app/requirements.txt
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 # 4. Atveram 8080 portu
@@ -47,3 +48,4 @@ EXPOSE 8080
 
 # 5. Noklusētā komanda - palaižam Flask serveri (server.py) ar python3
 CMD ["python3", "server.py"]
+# 3. Instalējam Python atkarības no requirements.txt
