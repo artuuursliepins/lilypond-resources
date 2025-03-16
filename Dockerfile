@@ -20,6 +20,11 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+ENV SERVER_LOCATION="Frankfurt, Germany"
+ENV TIMEZONE="Europe/Berlin"
+
+RUN ln -snf /usr/share/zoneinfo/$TIMEZONE /etc/localtime && echo $TIMEZONE > /etc/timezone
+
 # 2. Iestatām darba mapi un kopējam projektus
 WORKDIR /app
 COPY . /app
