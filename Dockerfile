@@ -3,6 +3,15 @@
 
 FROM ubuntu:22.04
 
+# Iestatām neinteraktīvo režīmu
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Atjaunojam pakotņu sarakstu un instalējam tzdata
+RUN apt-get update && \
+    apt-get install -y tzdata && \
+    ln -fs /usr/share/zoneinfo/Europe/Berlin /etc/localtime && \
+    dpkg-reconfigure --frontend noninteractive tzdata
+    
 # 1. Atjauninām sistēmu un instalējam nepieciešamās pakotnes
 RUN apt-get update && apt-get install -y \
     wget \
@@ -19,11 +28,6 @@ RUN apt-get update && apt-get install -y \
     texlive-latex-extra \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-
-ENV SERVER_LOCATION="Frankfurt, Germany"
-ENV TIMEZONE="Europe/Berlin"
-
-RUN ln -snf /usr/share/zoneinfo/$TIMEZONE /etc/localtime && echo $TIMEZONE > /etc/timezone
 
 # 2. Iestatām darba mapi un kopējam projektus
 WORKDIR /app
