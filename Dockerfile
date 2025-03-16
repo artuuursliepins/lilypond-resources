@@ -31,8 +31,6 @@ RUN apt-get update && apt-get install -y \
     python3-venv \
     python3-setuptools \
     python3-wheel \
-    # LilyPond + OMR
-    lilypond \
     tesseract-ocr \
     poppler-utils \
     ghostscript \
