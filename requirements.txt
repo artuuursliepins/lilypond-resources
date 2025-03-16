@@ -12,5 +12,6 @@ reportlab  # PDF apstrādei, ja nepieciešams
 numpy  # OpenCV var prasīt
 paramiko  # SSH automatizācijai
 pytz
-
-
+texlive-latex-extra
+ghostscript
+poppler-utils
