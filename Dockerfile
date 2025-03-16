@@ -1,16 +1,27 @@
-# Pilns Dockerfile projekta "lilypond-resources" vajadzībām
-# ====================================================================
-
 FROM ubuntu:22.04
 
-# Lai tzdata instalācijas laikā nejautā interaktīvi
 ENV DEBIAN_FRONTEND=noninteractive
+
+# Atjauninām, dzēšam veco lilypond, instalējam palīgrīkus
+RUN apt-get update && \
+    apt-get remove -y lilypond && \
+    apt-get install -y wget bzip2 && \
+    rm -rf /var/lib/apt/lists/*
+
+# Lejupielādējam LilyPond 2.24.0 instalatoru
+RUN wget https://mirrors.kernel.org/lilypond/binaries/linux-64/lilypond-2.24.0-1.linux-64.sh && \
+    chmod +x lilypond-2.24.0-1.linux-64.sh
+
+# Izpildām instalācijas skriptu neinteraktīvajā režīmā
+RUN ./lilypond-2.24.0-1.linux-64.sh --batch
 
 # (A) Instalējam tzdata (ja nepieciešams laika joslas iestatīšanai)
 RUN apt-get update && \
     apt-get install -y tzdata && \
     ln -fs /usr/share/zoneinfo/Europe/Berlin /etc/localtime && \
     dpkg-reconfigure --frontend noninteractive tzdata
+
+# Pilns Dockerfile projekta "lilypond-resources" vajadzībām
 
 # (B) Instalējam sistēmas pakotnes
 RUN apt-get update && apt-get install -y \
