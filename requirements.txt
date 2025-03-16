@@ -1,17 +1,22 @@
+# 1. Web framework
 flask
-uuid
+waitress
+
+# 2. Parocīgi rīki
 requests
-openai
+uuid
 python-dotenv
+
+# 3. OCR / OMR
 pytesseract
 opencv-python
 pdf2image
-waitress
-lilypond
-reportlab  # PDF apstrādei, ja nepieciešams
-numpy  # OpenCV var prasīt
-paramiko  # SSH automatizācijai
-pytz
-texlive-latex-extra
-ghostscript
-poppler-utils
+
+# 4. PDF apstrāde Python pusē
+reportlab
+
+# 5. Citas bibliotēkas
+numpy        # Nepieciešams OpenCV
+paramiko     # SSH pieslēgumiem
+pytz         # Laika joslu atbalsts
+openai       # GPT pieprasījumiem (ja vajag integrāciju ar OpenAI API)
