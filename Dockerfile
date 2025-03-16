@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y \
     software-properties-common \
     python3 \
     python3-pip \
-    lilypond \        # <--- Šis jau iekļauj lilypond-book
+    lilypond \       
     tesseract-ocr \
     poppler-utils \
     ghostscript \
