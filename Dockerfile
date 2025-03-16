@@ -10,6 +10,11 @@ RUN apt-get update && apt-get install -y \
     tesseract-ocr \
     poppler-utils \
     ghostscript \
+    texlive \
+    texlive-latex-base \
+    texlive-fonts-recommended \
+    texlive-latex-extra \
+    lilypond-book \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -25,3 +30,4 @@ EXPOSE 8080
 
 # 5. Palaižam Flask aplikāciju ar Waitress
 CMD ["python3", "server.py"]
+
