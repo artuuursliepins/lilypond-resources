@@ -1,23 +1,48 @@
-import os
-import uuid
-import subprocess
-import atexit
-from flask import Flask, request, send_file, jsonify
 from waitress import serve
+from flask import Flask, request, send_file, jsonify, render_template
+import os
+import subprocess
+import uuid
+import paramiko
+import atexit
 
 app = Flask(__name__)
+
+UPLOAD_FOLDER = "static/uploaded_scores"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 temp_files = []  # Saglabā pagaidu failus, lai tos iztīrītu
 
 @app.route("/")
 def index():
-    return "Sveiki! Šī ir LilyPond + GPT konvertēšanas API."
+    return render_template("index.html")
+
+@app.route("/convert", methods=["POST"])
+def convert_lilypond():
+    """Nosūta LilyPond kodu uz serveri un renderē"""
+    data = request.json
+    if not data or "lilypond_code" not in data:
+        return jsonify({"error": "Nepareizi ievaddati"}), 400
+
+    lilypond_code = data["lilypond_code"]
+    ly_filename = f"{UPLOAD_FOLDER}/{uuid.uuid4()}.ly"
+
+    with open(ly_filename, "w", encoding="utf-8") as f:
+        f.write(lilypond_code)
+    temp_files.append(ly_filename)
+
+    try:
+        subprocess.run(["lilypond", "--pdf", ly_filename], check=True)
+    except subprocess.CalledProcessError as e:
+        return jsonify({"error": f"LilyPond kļūda: {str(e)}"}), 500
+
+    output_pdf = ly_filename.replace(".ly", ".pdf")
+    temp_files.append(output_pdf)
+    return send_file(output_pdf, mimetype="application/pdf")
 
 @app.route("/convert-pdf-to-lilypond", methods=["POST"])
 def convert_pdf_to_lilypond():
-    """
-    Pieņem PDF failu ar notīm, izmanto OMR, lai konvertētu uz LilyPond.
-    """
+    """Pieņem PDF failu ar notīm, izmanto OMR, lai konvertētu uz LilyPond."""
     if 'file' not in request.files:
         return jsonify({"error": "Nav atrasts 'file' parametrs"}), 400
 
@@ -26,7 +51,6 @@ def convert_pdf_to_lilypond():
     file.save(pdf_filename)
     temp_files.append(pdf_filename)
 
-    # Simulēts LilyPond kods (OMR jāievieš vēlāk)
     lilypond_code = r"""
     \version "2.24.0"
     \relative c' {
@@ -47,9 +71,7 @@ def convert_pdf_to_lilypond():
 
 @app.route("/render-lilypond-to-png", methods=["POST"])
 def render_lilypond_to_png():
-    """
-    Pieņem LilyPond kodu (kā tekstu), uzģenerē PNG un atgriež lietotājam.
-    """
+    """Pieņem LilyPond kodu (kā tekstu), uzģenerē PNG un atgriež lietotājam."""
     data = request.json
     if not data or "lilypond_code" not in data:
         return jsonify({"error": "Nepareizi ievaddati"}), 400
