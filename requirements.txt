@@ -6,7 +6,9 @@ python-dotenv
 pytesseract
 opencv-python
 pdf2image
-pytesseract
 waitress
+lilypond
+reportlab  # PDF apstrādei, ja nepieciešams
+numpy  # OpenCV var prasīt
 
 
