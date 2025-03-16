@@ -1,3 +1,6 @@
+# Pilns Dockerfile projekta "lilypond-resources" vajadzībām
+# ====================================================================
+
 FROM ubuntu:22.04
 
 # 1. Atjauninām sistēmu un instalējam nepieciešamās pakotnes
@@ -24,8 +27,8 @@ COPY . /app
 # 3. Instalējam Python atkarības
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-# 4. Expose portu
+# 4. Atveram 8080 portu
 EXPOSE 8080
 
-# 5. Palaižam Flask aplikāciju ar Waitress
+# 5. Noklusētā komanda - palaižam Flask serveri (server.py) ar python3
 CMD ["python3", "server.py"]
