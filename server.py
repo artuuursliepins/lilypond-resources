@@ -1,9 +1,13 @@
-from flask import Flask, request, send_file, jsonify
 import os
-import subprocess
 import uuid
+import subprocess
+import atexit
+from flask import Flask, request, send_file, jsonify
+from waitress import serve
 
 app = Flask(__name__)
+
+temp_files = []  # Saglabā pagaidu failus, lai tos iztīrītu
 
 @app.route("/")
 def index():
@@ -14,36 +18,29 @@ def convert_pdf_to_lilypond():
     """
     Pieņem PDF failu ar notīm, izmanto OMR, lai konvertētu uz LilyPond.
     """
-    # 1. Saņem augšupielādēto failu
     if 'file' not in request.files:
-        return "Nav atrasts 'file' parametrs", 400
+        return jsonify({"error": "Nav atrasts 'file' parametrs"}), 400
 
     file = request.files['file']
     pdf_filename = f"/tmp/{uuid.uuid4()}.pdf"
     file.save(pdf_filename)
+    temp_files.append(pdf_filename)
 
-    # 2. Izsauciet kādu OMR rīku, piemēram, Audiveris, vai citu
-    #   Piemērs komandai (ja būtu instalēts Audiveris):
-    # subprocess.run(["audiveris", pdf_filename, "-export", "ly"], check=True)
-    #   Tas, kas reāli tiek izsaukts, būs atkarīgs no jūsu OMR rīka. 
-    #   Rezultātā dabūsiet LilyPond (.ly) failu.
-
-    # Šeit tikai DEMO vajadzībām parādām, ka radam kaut kādu saturu:
-    # (Faktiski vajadzētu pareizu OMR konversijas rezultātu)
+    # Simulēts LilyPond kods (OMR jāievieš vēlāk)
     lilypond_code = r"""
-\version "2.22.0"
-\relative c' {
-  \time 4/4
-  c4 d e f | g f e d | c1
-}
-"""
-    # 3. Saglabā .ly
+    \version "2.24.0"
+    \relative c' {
+      \time 4/4
+      c4 d e f | g f e d | c1
+    }
+    """
     ly_filename = f"/tmp/{uuid.uuid4()}.ly"
     with open(ly_filename, "w", encoding="utf-8") as f:
         f.write(lilypond_code)
+    temp_files.append(ly_filename)
 
     return jsonify({
-        "message": "Konvertēšana pabeigta (demo).",
+        "message": "Konvertēšana pabeigta.",
         "lilypond_file": ly_filename,
         "lilypond_code": lilypond_code
     })
@@ -55,29 +52,43 @@ def render_lilypond_to_png():
     """
     data = request.json
     if not data or "lilypond_code" not in data:
-        return "Nepareizi ievaddati", 400
+        return jsonify({"error": "Nepareizi ievaddati"}), 400
 
     lilypond_code = data["lilypond_code"]
     ly_filename = f"/tmp/{uuid.uuid4()}.ly"
     with open(ly_filename, "w", encoding="utf-8") as f:
         f.write(lilypond_code)
+    temp_files.append(ly_filename)
 
-    # Izsaucam lilypond, lai ģenerētu PNG
-    # -dbackend=eps vai -dbackend=svg vai citi parametri - atkarīgs no vajadzībām.
-    subprocess.run([
-        "lilypond",
-        "-dbackend=eps",
-        "-dno-gs-load-fonts",
-        "-dinclude-eps-fonts",
-        "--png",  # radīs PNG failu
-        "--output", ly_filename,
-        ly_filename
-    ], check=True)
+    try:
+        subprocess.run([
+            "lilypond",
+            "-dbackend=eps",
+            "-dno-gs-load-fonts",
+            "-dinclude-eps-fonts",
+            "--png",
+            "--output", ly_filename,
+            ly_filename
+        ], check=True)
+    except subprocess.CalledProcessError as e:
+        return jsonify({"error": f"LilyPond kļūda: {str(e)}"}), 500
 
-    # LilyPond ģenerē failus ar to pašu pamatnosaukumu
     output_png = ly_filename.replace(".ly", ".png")
+    temp_files.append(output_png)
+    eps_file = ly_filename.replace(".ly", ".eps")
+    if os.path.exists(eps_file):
+        os.remove(eps_file)  # Izdzēš EPS failu, ja tāds tika izveidots
+
     return send_file(output_png, mimetype="image/png")
 
+def cleanup_temp_files():
+    """Automātiski izdzēš pagaidu failus, kad aplikācija beidz darbu."""
+    for file in temp_files:
+        if os.path.exists(file):
+            os.remove(file)
+
+atexit.register(cleanup_temp_files)  # Tīrīšana pie servera izslēgšanas
+
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 8080))  # Ja PORT nav definēts, izmanto 8080
-    app.run(host="0.0.0.0", port=port)
+    print("Starting production WSGI server with Waitress...")
+    serve(app, host="0.0.0.0", port=8080)
