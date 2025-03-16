@@ -7,10 +7,21 @@ RUN apt-get update && \
     apt-get remove -y lilypond && \
     apt-get install -y wget bzip2 && \
     rm -rf /var/lib/apt/lists/*
+# 1. Dzēšam veco LilyPond, ja tas jau ir instalēts
+RUN apt-get remove -y lilypond || true
 
-# Lejupielādējam LilyPond 2.24.0 instalatoru
-RUN wget https://mirrors.kernel.org/lilypond/binaries/linux-64/lilypond-2.24.0-1.linux-64.sh && \
-    chmod +x lilypond-2.24.0-1.linux-64.sh
+# 2. Lejupielādējam un instalējam LilyPond 2.24.0 no oficiālās lapas
+RUN wget -O lilypond-2.24.0.tar.gz \
+    http://download.linuxaudio.org/lilypond/binaries/linux-64/lilypond-2.24.0.tar.gz && \
+    tar -xvzf lilypond-2.24.0.tar.gz && \
+    mv lilypond-2.24.0 /usr/local/lilypond && \
+    rm -f lilypond-2.24.0.tar.gz
+
+# 3. Pievienojam LilyPond ceļu globālajam PATH
+ENV PATH="/usr/local/lilypond/bin:$PATH"
+
+# 4. Pārbaudām, vai LilyPond darbojas
+RUN lilypond --version
 
 # Izpildām instalācijas skriptu neinteraktīvajā režīmā
 RUN ./lilypond-2.24.0-1.linux-64.sh --batch
