@@ -1,13 +1,90 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>LilyPond Renderer</title>
+    <meta charset="UTF-8">
+    <title>LilyPond Resources – Test Page</title>
 </head>
 <body>
-    <h2>Ievadiet LilyPond kodu</h2>
-    <form action="/convert" method="post">
-        <textarea name="lilypond_code" rows="10" cols="50"></textarea><br>
-        <input type="submit" value="Renderēt">
+    <h1>Test LilyPond & OMR Functions</h1>
+    <hr>
+
+    <!-- (A) PDF -> LilyPond -->
+    <h2>PDF → LilyPond</h2>
+    <p>Augšupielādējiet PDF failu ar notīm (OMR simulācija) un saņemiet LilyPond kodu.</p>
+    <form action="/convert-pdf-to-lilypond" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept="application/pdf">
+        <button type="submit">Convert PDF to LilyPond</button>
     </form>
+    <hr>
+
+    <!-- (B) LilyPond → PDF -->
+    <h2>LilyPond → PDF</h2>
+    <p>Ievadiet LilyPond kodu, lai atgūtu PDF partitūru.</p>
+    <form action="/render-lilypond-to-pdf" method="post">
+        <textarea name="lilypond_code" rows="6" cols="60">\relative c' { c4 d e f | g a b c }</textarea><br>
+        <button type="submit">Render to PDF</button>
+    </form>
+    <hr>
+
+    <!-- (C) LilyPond → PNG -->
+    <h2>LilyPond → PNG</h2>
+    <p>Ievadiet LilyPond kodu, lai saņemtu PNG attēlu.</p>
+    <form action="/render-lilypond-to-png" method="post">
+        <textarea name="lilypond_code" rows="6" cols="60">\relative c' { c4 d e f | g f e d }</textarea><br>
+        <button type="submit">Render to PNG</button>
+    </form>
+    <hr>
+
+    <!-- (D) LilyPond → MIDI -->
+    <h2>LilyPond → MIDI</h2>
+    <p>Ievadiet LilyPond kodu (ar <code>\\midi</code> blokiem, ja nepieciešams) un saņemiet MIDI failu.</p>
+    <form action="/render-lilypond-to-midi" method="post">
+        <textarea name="lilypond_code" rows="8" cols="60">
+\version "2.24.0"
+\relative c' {
+  c4 d e f | g4 a b c
+  \midi { }
+}
+        </textarea><br>
+        <button type="submit">Render to MIDI</button>
+    </form>
+    <hr>
+
+    <!-- (E) LilyPond + LaTeX (lilypond-book) -->
+    <h2>LilyPond + LaTeX → PDF</h2>
+    <p>Augšupielādējiet <code>.lytex</code> / <code>.tex</code> saturu, kas satur <code>\\begin{lilypond} ... \\end{lilypond}</code> fragmentus. Atdos PDF.</p>
+    <form action="/render-lilypond-latex" method="post">
+        <textarea name="latex_code" rows="10" cols="70">
+\documentclass{article}
+\usepackage{lilypond-book}
+\begin{document}
+
+\begin{lilypond}
+\relative c' {
+  \time 3/4
+  c4 d e | f g a | g2 f
+}
+\end{lilypond}
+
+\end{document}
+        </textarea><br>
+        <button type="submit">Process LaTeX (lilypond-book)</button>
+    </form>
+    <hr>
+
+    <!-- Papildinformācija par GET -->
+    <h3>Lejupielādēt failus ar GET (ja serverī definēts)</h3>
+    <p>
+      Ja <code>server.py</code> satur maršrutu, piemēram:
+      <pre>
+@app.route(&quot;/scores/&lt;filename&gt;&quot;)
+def get_score_file(filename):
+    ...
+      </pre>
+      Tad tu vari iegūt PDF / PNG / MIDI, piekļūstot saitei 
+      <code>https://lilypond-resources.onrender.com/scores/filename.pdf</code>,
+      <code>filename.png</code>, utt.
+    </p>
+
 </body>
 </html>
