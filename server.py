@@ -11,9 +11,10 @@ from datetime import datetime
 
 ##
 # Šī ir server.py kods, kas nodrošina LilyPond konvertēšanu
-# (PDF, PNG, MIDI, LaTeX) un OMR (PDF→LilyPond). 
+# (PDF, PNG, MIDI, LaTeX) un OMR (PDF→LilyPond).
 # Papildus iekļauta sadaļa /health stāvokļa pārbaudei un
 # /scores/<filename> GET maršruts, lai izgūtu ģenerētos failus.
+# Tagad pievienota API Key aizsardzība. 
 ##
 
 app = Flask(__name__)
@@ -28,6 +29,25 @@ def get_current_time():
     return datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S")
 
 temp_files = []  # Saglabā failus, ko tīram pēc servera izslēgšanas
+
+# ======  Pievienojam API Key  =======
+API_KEY = os.getenv("API_KEY", "super_secret_api_key")
+
+def require_api_key(f):
+    """Dekorators, kas pārbauda, vai pieprasījumam ir derīgs API Key."""
+    def wrapper(*args, **kwargs):
+        auth_header = request.headers.get("Authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            return jsonify({"error": "Unauthorized - missing or invalid Authorization header"}), 401
+
+        provided_key = auth_header.replace("Bearer ", "").strip()
+        if provided_key != API_KEY:
+            return jsonify({"error": "Unauthorized - invalid API key"}), 401
+
+        return f(*args, **kwargs)
+    wrapper.__name__ = f.__name__
+    return wrapper
+# ====================================
 
 @app.route("/health", methods=["GET"])
 def health():
@@ -60,6 +80,7 @@ def get_score_file(filename):
     return send_file(filepath)
 
 @app.route("/convert-pdf-to-lilypond", methods=["GET", "POST"])
+@require_api_key
 def convert_pdf_to_lilypond():
     """
     Pieņem PDF failu ar notīm (OMR simulācija) un atgriež LilyPond kodu.
@@ -97,6 +118,7 @@ def convert_pdf_to_lilypond():
     })
 
 @app.route("/render-lilypond-to-pdf", methods=["GET", "POST"])
+@require_api_key
 def render_lilypond_to_pdf():
     """
     Saņem LilyPond kodu (POST formā vai JSON) un renderē PDF.
@@ -130,6 +152,7 @@ def render_lilypond_to_pdf():
     })
 
 @app.route("/render-lilypond-to-png", methods=["GET", "POST"])
+@require_api_key
 def render_lilypond_to_png():
     """
     Saņem LilyPond kodu un renderē PNG (ar lilypond --png).
@@ -172,6 +195,7 @@ def render_lilypond_to_png():
     })
 
 @app.route("/render-lilypond-to-midi", methods=["GET", "POST"])
+@require_api_key
 def render_lilypond_to_midi():
     """
     Saņem LilyPond kodu un renderē MIDI (ar lilypond --output).
@@ -208,6 +232,7 @@ def render_lilypond_to_midi():
     })
 
 @app.route("/render-lilypond-latex", methods=["GET", "POST"])
+@require_api_key
 def render_lilypond_latex():
     """
     Saņem LaTeX + LilyPond (lytex) saturu un izmanto lilypond-book + pdflatex,
