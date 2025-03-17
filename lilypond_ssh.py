@@ -7,9 +7,9 @@ LOCAL_FILE = "my_score.ly"
 REMOTE_FILE = f"{REMOTE_DIR}/my_score.ly"
 OUTPUT_FILE = f"{REMOTE_DIR}/my_score.pdf"
 
-client = paramiko.SSHClient()
-client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-client.connect(HOST, username=USER)
+private_key_path = "/home/user/.ssh/id_rsa"
+key = paramiko.RSAKey(filename=private_key_path)
+client.connect(HOST, username=USER, pkey=key)
 
 sftp = client.open_sftp()
 sftp.put(LOCAL_FILE, REMOTE_FILE)
