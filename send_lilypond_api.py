@@ -12,9 +12,7 @@ lilypond_code = r"""
   c4 d e f | g a b c | c2 g | f e d c
 }
 """
-
-# Nosūtām pieprasījumu uz serveri
-response = requests.post(API_URL, json={"input_code": lilypond_code})
+response = requests.post(API_URL, json={"lilypond_code": lilypond_code})
 
 # Apstrādājam atbildi
 if response.status_code == 200:
